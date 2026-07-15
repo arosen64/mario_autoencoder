@@ -95,19 +95,8 @@ argument above.
 
 ## Open questions
 
-Every evaluation now draws its windows i.i.d. from the training marginals, so the
-code is scored on the same source whose entropy fixes its capacity. An earlier
-version scored reconstruction, correlation, and per-bit entropy on a uniform draw
-instead, which is worth naming rather than quietly correcting. Uniform six-way
-events carry 2.585 bits each and need `100 × 2.585 = 258.5` bits per window
-against the 247 available, so reconstruction was being measured on a distribution
-the code cannot represent even in principle, and the bit statistics described the
-encoder's response to inputs it was never built for. The order-sensitivity test
-had sampled from the marginals all along, which is what made the inconsistency
-visible once the two were read side by side.
-
-Even in distribution, a fixed-width code sitting at exactly the entropy bound
-cannot be lossless in general. It has no headroom, and lossless coding needs
+A fixed-width code sitting at exactly the entropy bound cannot be lossless in
+general. It has no headroom, and lossless coding needs
 either slack or variable-length output. Per-event accuracy also compounds across a
 window, since exact recovery demands all 100 events land correctly, so
 whole-window fidelity falls off far faster than the per-event rate suggests. The
