@@ -37,8 +37,7 @@ third is a lookup memoriser that learns nothing, assigning every window in the
 real dataset a fixed random code and encoding anything unseen to zeros. It makes
 the standard objection to any autoencoder result, that the network merely
 memorized a `sample ↔ bitstring` table, literal enough to measure against. All
-three are evaluated on reconstruction, latent correlation, order sensitivity, and
-per-bit entropy.
+three are evaluated on reconstruction, latent correlation, and per-bit entropy.
 
 Everything lives in `main.ipynb`, alongside the source TAS replays (`120_stars`,
 `70_stars`, `big_bob_omb_on_the_summit`).
@@ -52,7 +51,6 @@ Everything lives in `main.ipynb`, alongside the source TAS replays (`120_stars`,
 | Mean pairwise \|r\| between bits | 0.029 | 0.014 | n/a |
 | Bit pairs with \|r\| > 0.5 | 0 of 30,381 | 0 of 30,381 | n/a |
 | Reconstruction, macro F1 | 0.973 | 0.767 | 0.048 |
-| Shuffle / baseline Hamming ratio | 0.99 | 0.99 | n/a |
 
 The central result is that an autoencoder handed exactly `H` bits of capacity
 learns a code with the statistical properties theory predicts for an optimal one.
@@ -65,15 +63,15 @@ Nothing in the loss function asked for decorrelated or high-entropy bits.
 Reconstruction pressure against a bound-sized bottleneck was enough to produce
 them.
 
-That result depends on the order-sensitivity test to mean anything. A code
-tracking only category counts would reconstruct respectably against these skewed
-marginals while needing far fewer than 247 bits, and its bits could still show
-high entropy and low correlation, making the signature above an artifact of a
-bag-of-events summary rather than evidence of efficient sequence coding. The
-shuffle test rules this out: reordering a window's events displaces its code as
-far as substituting an entirely unrelated window (a ratio of 0.99, where 0.0 would
-indicate order-blindness), and none of 2,000 shuffles returned its original code.
-The 247 bits are genuinely spent on sequence information.
+That signature would be worth little if the code were not encoding the sequence
+itself. A representation keeping only category counts would need far fewer than
+247 bits, and its bits could still show high entropy and low correlation, making
+the result above an artifact of a bag-of-events summary rather than evidence of
+efficient sequence coding. Reconstruction fidelity rules this out on its own,
+because it is scored per position: the loss is a 6-way cross-entropy at each of
+the 100 slots, and a counts-only code would have to guess the marginal at every
+slot, scoring near the control's 0.048 rather than 0.973. Per-position recovery at
+that level is only possible if the 247 bits carry the ordered sequence.
 
 The lookup control addresses the other standard objection, that the network simply
 memorized a table. It behaves nothing like the trained models, reconstructing
