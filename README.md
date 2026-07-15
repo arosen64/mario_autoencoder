@@ -78,7 +78,7 @@ The 247 bits are genuinely spent on sequence information.
 The lookup control addresses the other standard objection, that the network simply
 memorized a table. It behaves nothing like the trained models, reconstructing
 unseen windows at 0.048 macro F1 against Annealing's 0.973, with not one of its
-247 bits varying across random inputs. Whatever the trained encoders learned
+247 bits varying across the evaluation windows. Whatever the trained encoders learned
 generalizes to windows they never encountered, which a lookup table cannot do by
 construction.
 
@@ -95,19 +95,24 @@ argument above.
 
 ## Open questions
 
-The sharpest form of the entropy question has not in fact been measured yet.
-Reconstruction is evaluated on uniform random windows, not on the training
-distribution. Uniform six-way events carry 2.585 bits each, so those windows need
-`100 × 2.585 = 258.5` bits, exceeding the 247 available. Lossless reconstruction
-there is impossible in principle, and 0.973 macro F1 under that handicap reads as
-near the achievable ceiling rather than as a shortfall. But the question actually
-posed here, how close to lossless a 247-bit code gets on a 246.83-bit source,
-requires evaluating on windows drawn from the training marginals, and that is the
-natural next experiment. A caveat applies to it in advance: 97% per-event accuracy
-is not lossless, since at that rate exact whole-window recovery is rare (roughly
-`0.97¹⁰⁰`). Some loss is expected of a fixed-width code at exactly the entropy
-bound, which has no headroom. The honest description is a strong lossy compressor
-at the bound, not a bijection.
+Every evaluation now draws its windows i.i.d. from the training marginals, so the
+code is scored on the same source whose entropy fixes its capacity. An earlier
+version scored reconstruction, correlation, and per-bit entropy on a uniform draw
+instead, which is worth naming rather than quietly correcting. Uniform six-way
+events carry 2.585 bits each and need `100 × 2.585 = 258.5` bits per window
+against the 247 available, so reconstruction was being measured on a distribution
+the code cannot represent even in principle, and the bit statistics described the
+encoder's response to inputs it was never built for. The order-sensitivity test
+had sampled from the marginals all along, which is what made the inconsistency
+visible once the two were read side by side.
+
+Even in distribution, a fixed-width code sitting at exactly the entropy bound
+cannot be lossless in general. It has no headroom, and lossless coding needs
+either slack or variable-length output. Per-event accuracy also compounds across a
+window, since exact recovery demands all 100 events land correctly, so
+whole-window fidelity falls off far faster than the per-event rate suggests. The
+honest description remains a strong lossy compressor at the bound rather than a
+bijection, and the useful question is how small the gap gets.
 
 A single point on the capacity curve is likewise suggestive rather than
 conclusive. The strongest version of this result would sweep `LATENT_DIM` above
